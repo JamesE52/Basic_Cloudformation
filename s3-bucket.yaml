@@ -1,3 +1,15 @@
+# CloudFormationTemplateVersion 
+# Description 
+
+# AWSTemplateFormatversion
+# Description: 
+# Resources:
+  # S3Bucket:
+    # Type:
+    # Propereties:
+      # BucketName: "Add Global Unique Name"
+
+
 # CloudFormationTemplateVersion
 # Description
 
