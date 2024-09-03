@@ -1,0 +1,124 @@
+# AWSTemplateFormatversion: 
+# Description: VPC YAML deployment template
+
+# Resources: 
+  # ("Name of VPC"):
+    # Type: "AWS::EC2::VPC"
+    # Properties:
+      # CidrBlock: ("Input IP address" )
+      # EnableDnsSupport: true
+      # EnableDnsHostnames: true
+      # Tags:
+        # - Key: Name
+          # Value: ("Name of VPC")
+
+
+
+
+AWSTemplateFormatversion: 
+Description:
+
+Resources: 
+  Rapid7VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: Rapid7VPC
+
+# PublicSubnetA1:
+  # Type: "AWS::EC2::subnet"
+  # Properties:
+    # VpcID: !Ref
+    # Availabilityzone: !Select (0, !GetAZs '')
+    # CidrBlock:
+    # MapPublicIpOnLaunch: true
+      # Tags: 
+      # - Key: Name
+      # Value: 
+
+Rapid7PublicSubnet1A:
+  Type: "AWS::EC2::Subnet"
+  Properties: 
+    VpcId: !Ref Rapid7VPC
+    CidrBlock:
+    AvailabilityZone: !Select [0, !GetAZs '']
+    MapPublicIpOnLaunch: true
+    tags:
+      - Key: Name
+        Value: Rapid7PublicSubnet1A
+
+  Rapid7PrivateSubnet1A: 
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref Rapid7VPC
+      CidrBlock: ""
+      AvailabilityZone: !Select [0, !GetAzs ""]
+      Tags:
+        - Keys: Name
+          Value: Rapid7PrivateSubnet1A
+
+# IGW & Routing Table 
+# InternetGateway: 
+#  Type: "AWS::EC2::InternetGateway" 
+#  Properties:
+#    Tags: 
+#      - Keys: Name
+#        Value: Rapid7-IGW
+
+
+# Attach Gateway 
+# AttachGateway:
+#   Type: "AWS::EC2::VPCGatewayAttachment"
+#   Properties:
+#     VpcId: !Ref Rapid7VPC
+#     InternetGatewayId: InternetGateway
+
+InternetGateway: 
+  Type: "AWS::EC2::InternetGateway" 
+  Properties:
+    Tags: 
+    - Keys: Name
+      Value: Rapid7-IGW
+
+AttachGateway:
+  Type: "AWS::EC2::VPCGatewayAttachment"
+  Properties:
+    VpcId: !Ref Rapid7VPC
+    InternetGatewayId: InternetGateway
+
+# Route Table
+# PublicRouteTable:
+#   Type: "AWS::EC2::RouteTable"
+#   Properties:
+#     VpcId: !Ref RapidVPC
+#     Tags:
+#       - Key: Name
+#         Value: Rapid7PublicRouteTable
+
+PublicRouteTable:
+  Type: "AWS::EC2::RouteTable"
+  Properties:
+    VpcId: !Ref RapidVPC
+    Tags:
+      - Key: Name
+      Value: Rapid7PublicRouteTable
+
+# Attach Routetable to IGW
+PublicRoute:
+  Type: "AWS::EC2::Route"
+  DependsOn: AttachGateway
+  Properties:
+    RouteTableId: !Ref Rapid7PublicRouteTable
+    DestinationCidrBlock: "0.0.0.0/0"
+    GatewayId: !Ref InternetGateway
+
+# Route table Associattion 
+PublicSubnet1ARouteTableAssociation:
+  Type: "AWS:EC2::SubnetRouteTable"
+  Properties:
+    SubnetId: !Ref PublicSubnet1A
+    RouteTableId: !Ref PublicRouteTable
